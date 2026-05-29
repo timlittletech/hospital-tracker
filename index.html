@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hospital">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Cpath d='M50 25v50M25 50h50' stroke='%2360a5fa' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Hospital Tracker</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-elevated: #1e293b;
+    --bg-input: #334155;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --accent: #60a5fa;
+    --accent-strong: #3b82f6;
+    --green: #34d399;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.4; }
+  body { min-height: 100vh; padding-bottom: 80px; }
+  header { background: var(--bg-elevated); padding: 16px 16px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .stay-info { color: var(--text-dim); font-size: 13px; }
+  main { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
+  .quick-btn { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text); padding: 16px 12px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: transform 0.05s, background 0.1s; }
+  .quick-btn:active { transform: scale(0.97); background: var(--bg-input); }
+  .quick-btn .icon { font-size: 22px; }
+  .quick-btn.pain { border-color: var(--red); }
+  .quick-btn.med { border-color: var(--accent); }
+  .quick-btn.bowel { border-color: var(--green); }
+  .quick-btn.q { border-color: var(--amber); }
+  .quick-btn.care { border-color: var(--purple); }
+  .quick-btn.note { border-color: var(--pink); }
+  .section-title { color: var(--text-dim); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
+  .timeline { display: flex; flex-direction: column; gap: 10px; }
+  .entry { background: var(--bg-elevated); border-radius: 12px; padding: 12px 14px; border-left: 3px solid var(--border); }
+  .entry.type-pain { border-left-color: var(--red); }
+  .entry.type-medication { border-left-color: var(--accent); }
+  .entry.type-bowel { border-left-color: var(--green); }
+  .entry.type-question { border-left-color: var(--amber); }
+  .entry.type-care { border-left-color: var(--purple); }
+  .entry.type-note { border-left-color: var(--pink); }
+  .entry-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 4px; }
+  .entry-type { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 600; }
+  .entry-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .entry-title { font-weight: 500; margin: 2px 0; word-wrap: break-word; }
+  .entry-meta { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+  .entry-notes { color: var(--text-dim); font-size: 13px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); white-space: pre-wrap; word-wrap: break-word; }
+  .entry-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .entry-btn { background: var(--bg-input); border: none; color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .entry-btn:active { background: var(--border); }
+  .entry-btn.danger { color: var(--red); }
+  .question.answered { opacity: 0.55; }
+  .question.answered .entry-title { text-decoration: line-through; }
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 14px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-elevated); border-radius: 20px 20px 0 0; padding: 20px 16px 32px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease-out; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h2 { margin: 0 0 16px; font-size: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; color: var(--text-dim); font-size: 13px; margin-bottom: 6px; font-weight: 500; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 10px; font-size: 16px; font-family: inherit; }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: var(--accent-strong); color: white; }
+  .btn-primary:active { background: var(--accent); }
+  .btn-secondary { background: var(--bg-input); color: var(--text); }
+  .pain-scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
+  .pain-btn { aspect-ratio: 1; background: var(--bg-input); border: 2px solid transparent; color: var(--text); border-radius: 10px; font-size: 18px; font-weight: 600; cursor: pointer; }
+  .pain-btn[data-level="0"] { background: #064e3b; }
+  .pain-btn[data-level="1"], .pain-btn[data-level="2"] { background: #065f46; }
+  .pain-btn[data-level="3"], .pain-btn[data-level="4"] { background: #92400e; }
+  .pain-btn[data-level="5"], .pain-btn[data-level="6"] { background: #b45309; }
+  .pain-btn[data-level="7"], .pain-btn[data-level="8"] { background: #b91c1c; }
+  .pain-btn[data-level="9"], .pain-btn[data-level="10"] { background: #7f1d1d; }
+  .pain-btn.selected { border-color: var(--accent); transform: scale(1.05); }
+  .pain-btn:active { transform: scale(0.95); }
+  .bowel-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+  .bowel-btn { background: var(--bg-input); border: 2px solid transparent; color: var(--text); padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; text-align: center; font-weight: 500; }
+  .bowel-btn.selected { border-color: var(--green); background: var(--bg-input); }
+  .bowel-btn:active { transform: scale(0.97); }
+  .footer-actions { background: var(--bg-elevated); border-top: 1px solid var(--border); padding: 12px 16px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; gap: 8px; justify-content: center; z-index: 40; }
+  .footer-actions button { background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+  .footer-actions button:active { background: var(--bg-input); color: var(--text); }
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--green); color: #064e3b; padding: 10px 18px; border-radius: 24px; font-weight: 600; font-size: 14px; z-index: 200; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+  .filter-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim); padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .filter-chip.active { background: var(--accent-strong); border-color: var(--accent-strong); color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hospital Tracker</h1>
+  <div class="stay-info" id="stayInfo">Loading…</div>
+</header>
+
+<main>
+  <div class="quick-actions">
+    <button class="quick-btn pain" onclick="openModal('pain')"><span class="icon">🩺</span><span>Pain Level</span></button>
+    <button class="quick-btn med" onclick="openModal('medication')"><span class="icon">💊</span><span>Medication</span></button>
+    <button class="quick-btn bowel" onclick="openModal('bowel')"><span class="icon">🌿</span><span>Bowel Activity</span></button>
+    <button class="quick-btn q" onclick="openModal('question')"><span class="icon">❓</span><span>Question</span></button>
+    <button class="quick-btn care" onclick="openModal('care')"><span class="icon">👩‍⚕️</span><span>Care Note</span></button>
+    <button class="quick-btn note" onclick="openModal('note')"><span class="icon">📝</span><span>Quick Note</span></button>
+  </div>
+
+  <div class="section-title">Timeline</div>
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="question">Questions</button>
+    <button class="filter-chip" data-filter="medication">Meds</button>
+    <button class="filter-chip" data-filter="pain">Pain</button>
+    <button class="filter-chip" data-filter="bowel">Bowel</button>
+    <button class="filter-chip" data-filter="care">Care</button>
+    <button class="filter-chip" data-filter="note">Notes</button>
+  </div>
+  <div class="timeline" id="timeline"></div>
+</main>
+
+<div class="footer-actions">
+  <button onclick="exportData()">Export</button>
+  <button onclick="importData()">Import</button>
+  <button onclick="setStayStart()">Stay start</button>
+</div>
+
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'hospital-tracker-v1';
+const state = loadState();
+let currentFilter = 'all';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.error('Load failed', e); }
+  return { entries: [], stayStartedAt: new Date().toISOString() };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const opts = sameDay
+    ? { hour: 'numeric', minute: '2-digit' }
+    : { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+  return d.toLocaleString('en-US', opts);
+}
+
+function updateStayInfo() {
+  if (!state.stayStartedAt) {
+    document.getElementById('stayInfo').textContent = 'Tap "Stay start" to set arrival';
+    return;
+  }
+  const start = new Date(state.stayStartedAt);
+  const now = new Date();
+  const hours = Math.floor((now - start) / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+  const remH = hours % 24;
+  const dayStr = days === 0 ? `${hours}h in` : days === 1 ? `Day 2 (${remH}h in)` : `Day ${days + 1} (${remH}h in)`;
+  document.getElementById('stayInfo').textContent = `${dayStr} · since ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+}
+
+function setStayStart() {
+  const input = prompt('Stay start (YYYY-MM-DD HH:MM, 24h). Leave blank for now.', '');
+  let d;
+  if (!input || !input.trim()) {
+    d = new Date();
+  } else {
+    d = new Date(input.replace(' ', 'T'));
+    if (isNaN(d.getTime())) { alert('Invalid date'); return; }
+  }
+  state.stayStartedAt = d.toISOString();
+  saveState();
+  updateStayInfo();
+  toast('Stay start set');
+}
+
+function render() {
+  updateStayInfo();
+  const list = document.getElementById('timeline');
+  const filtered = currentFilter === 'all'
+    ? state.entries
+    : state.entries.filter(e => e.type === currentFilter);
+  const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty">No entries yet. Tap a button above to add one.</div>';
+    return;
+  }
+  list.innerHTML = sorted.map(entryHTML).join('');
+}
+
+function entryHTML(e) {
+  const typeLabels = { pain: 'Pain', medication: 'Medication', bowel: 'Bowel', question: 'Question', care: 'Care', note: 'Note' };
+  let title = '';
+  let meta = '';
+  let extraClass = '';
+  let actions = '';
+  if (e.type === 'pain') {
+    title = `Pain: ${e.level}/10`;
+    if (e.location) meta = e.location;
+  } else if (e.type === 'medication') {
+    title = e.name;
+    meta = [e.dose, e.givenBy].filter(Boolean).join(' · ');
+  } else if (e.type === 'bowel') {
+    title = e.activity;
+  } else if (e.type === 'question') {
+    title = e.question;
+    extraClass = 'question' + (e.answered ? ' answered' : '');
+    actions = e.answered
+      ? `<button class="entry-btn" onclick="toggleAnswered('${e.id}')">Unmark</button>`
+      : `<button class="entry-btn" onclick="toggleAnswered('${e.id}')">Mark answered</button>`;
+    if (e.answer) meta = 'Answer: ' + e.answer;
+  } else if (e.type === 'care') {
+    title = e.what;
+    if (e.who) meta = 'by ' + e.who;
+  } else if (e.type === 'note') {
+    title = e.text;
+  }
+  actions += ` <button class="entry-btn danger" onclick="deleteEntry('${e.id}')">Delete</button>`;
+  return `
+    <div class="entry type-${e.type} ${extraClass}">
+      <div class="entry-head">
+        <div class="entry-type">${typeLabels[e.type] || e.type}</div>
+        <div class="entry-time">${fmtTime(e.timestamp)}</div>
+      </div>
+      <div class="entry-title">${escapeHTML(title)}</div>
+      ${meta ? `<div class="entry-meta">${escapeHTML(meta)}</div>` : ''}
+      ${e.notes ? `<div class="entry-notes">${escapeHTML(e.notes)}</div>` : ''}
+      <div class="entry-actions">${actions}</div>
+    </div>`;
+}
+
+function escapeHTML(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function openModal(type) {
+  const c = document.getElementById('modalContent');
+  c.innerHTML = modalHTML(type);
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => {
+    const first = c.querySelector('input, textarea, button.pain-btn, button.bowel-btn');
+    if (first && first.tagName !== 'BUTTON') first.focus();
+  }, 100);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function modalHTML(type) {
+  const titles = { pain: 'Pain Level', medication: 'Medication', bowel: 'Bowel Activity', question: 'New Question', care: 'Care Received', note: 'Quick Note' };
+  let body = '';
+  if (type === 'pain') {
+    body = `
+      <div class="field">
+        <label>Pain level (0–10)</label>
+        <div class="pain-scale" id="painScale">
+          ${[0,1,2,3,4,5,6,7,8,9,10].map(n => `<button type="button" class="pain-btn" data-level="${n}" onclick="selectPain(${n})">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field">
+        <label>Where (optional)</label>
+        <input type="text" id="painLocation" placeholder="incision / general / etc.">
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <textarea id="entryNotes" placeholder="anything else"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="savePain()">Save</button>
+      </div>`;
+  } else if (type === 'medication') {
+    body = `
+      <div class="field"><label>Name</label><input type="text" id="medName" placeholder="e.g. morphine, tylenol" autocomplete="off"></div>
+      <div class="field"><label>Dose</label><input type="text" id="medDose" placeholder="e.g. 4mg IV, 650mg PO" autocomplete="off"></div>
+      <div class="field"><label>Given by (optional)</label><input type="text" id="medBy" placeholder="nurse name" autocomplete="off"></div>
+      <div class="field"><label>Notes (optional)</label><textarea id="entryNotes" placeholder="reaction, route, reason"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMedication()">Save</button>
+      </div>`;
+  } else if (type === 'bowel') {
+    const opts = ['Bowel sounds heard','Passed gas','Bowel movement','Nausea','Vomiting','No activity'];
+    body = `
+      <div class="field">
+        <label>What happened</label>
+        <div class="bowel-options" id="bowelOptions">
+          ${opts.map(o => `<button type="button" class="bowel-btn" onclick="selectBowel(this, '${o}')">${o}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field"><label>Notes (optional)</label><textarea id="entryNotes" placeholder="amount, consistency, etc."></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBowel()">Save</button>
+      </div>`;
+  } else if (type === 'question') {
+    body = `
+      <div class="field"><label>Question</label><textarea id="qText" placeholder="What do you want to ask?"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveQuestion()">Save</button>
+      </div>`;
+  } else if (type === 'care') {
+    body = `
+      <div class="field"><label>What was done</label><input type="text" id="careWhat" placeholder="e.g. vitals checked, IV changed" autocomplete="off"></div>
+      <div class="field"><label>By whom (optional)</label><input type="text" id="careWho" placeholder="nurse / doctor name" autocomplete="off"></div>
+      <div class="field"><label>Notes (optional)</label><textarea id="entryNotes" placeholder="anything to remember"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCare()">Save</button>
+      </div>`;
+  } else if (type === 'note') {
+    body = `
+      <div class="field"><label>Note</label><textarea id="noteText" placeholder="anything you want to log" autofocus></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNote()">Save</button>
+      </div>`;
+  }
+  return `<h2>${titles[type]}</h2>${body}`;
+}
+
+let selectedPain = null;
+function selectPain(n) {
+  selectedPain = n;
+  document.querySelectorAll('#painScale .pain-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.level, 10) === n);
+  });
+}
+
+let selectedBowel = null;
+function selectBowel(btn, val) {
+  selectedBowel = val;
+  document.querySelectorAll('#bowelOptions .bowel-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function addEntry(entry) {
+  state.entries.push({ id: cryptoRandomId(), timestamp: new Date().toISOString(), ...entry });
+  saveState();
+  closeModal();
+  render();
+  toast('Saved');
+}
+
+function cryptoRandomId() {
+  return (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2, 9));
+}
+
+function savePain() {
+  if (selectedPain === null) { alert('Pick a level'); return; }
+  addEntry({ type: 'pain', level: selectedPain, location: document.getElementById('painLocation').value.trim(), notes: document.getElementById('entryNotes').value.trim() });
+  selectedPain = null;
+}
+
+function saveMedication() {
+  const name = document.getElementById('medName').value.trim();
+  if (!name) { alert('Name required'); return; }
+  addEntry({ type: 'medication', name, dose: document.getElementById('medDose').value.trim(), givenBy: document.getElementById('medBy').value.trim(), notes: document.getElementById('entryNotes').value.trim() });
+}
+
+function saveBowel() {
+  if (!selectedBowel) { alert('Pick what happened'); return; }
+  addEntry({ type: 'bowel', activity: selectedBowel, notes: document.getElementById('entryNotes').value.trim() });
+  selectedBowel = null;
+}
+
+function saveQuestion() {
+  const q = document.getElementById('qText').value.trim();
+  if (!q) { alert('Type a question'); return; }
+  addEntry({ type: 'question', question: q, answered: false, answer: '' });
+}
+
+function saveCare() {
+  const what = document.getElementById('careWhat').value.trim();
+  if (!what) { alert('What is required'); return; }
+  addEntry({ type: 'care', what, who: document.getElementById('careWho').value.trim(), notes: document.getElementById('entryNotes').value.trim() });
+}
+
+function saveNote() {
+  const t = document.getElementById('noteText').value.trim();
+  if (!t) { alert('Type something'); return; }
+  addEntry({ type: 'note', text: t });
+}
+
+function toggleAnswered(id) {
+  const e = state.entries.find(x => x.id === id);
+  if (!e) return;
+  if (!e.answered) {
+    const ans = prompt('Answer (optional)', e.answer || '');
+    e.answered = true;
+    if (ans !== null && ans.trim()) e.answer = ans.trim();
+  } else {
+    e.answered = false;
+  }
+  saveState();
+  render();
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  state.entries = state.entries.filter(e => e.id !== id);
+  saveState();
+  render();
+  toast('Deleted');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '');
+  a.href = url;
+  a.download = `hospital-tracker-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Exported');
+}
+
+function importData() {
+  document.getElementById('importFile').click();
+}
+
+document.getElementById('importFile').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.entries || !Array.isArray(data.entries)) throw new Error('Bad format');
+      if (!confirm(`Import ${data.entries.length} entries? This REPLACES current data.`)) return;
+      state.entries = data.entries;
+      if (data.stayStartedAt) state.stayStartedAt = data.stayStartedAt;
+      saveState();
+      render();
+      toast('Imported');
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+document.querySelectorAll('#filterBar .filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    currentFilter = chip.dataset.filter;
+    document.querySelectorAll('#filterBar .filter-chip').forEach(c => c.classList.toggle('active', c === chip));
+    render();
+  });
+});
+
+// Update stay info every minute
+setInterval(updateStayInfo, 60 * 1000);
+
+render();
+</script>
+</body>
+</html>
