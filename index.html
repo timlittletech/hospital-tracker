@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Hospital">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Cpath d='M50 25v50M25 50h50' stroke='%2360a5fa' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
 <title>Hospital Tracker</title>
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 <style>
   :root {
     --bg: #0f172a;
@@ -35,13 +36,13 @@
   .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
   .quick-btn { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text); padding: 16px 12px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: transform 0.05s, background 0.1s; }
   .quick-btn:active { transform: scale(0.97); background: var(--bg-input); }
-  .quick-btn .icon { font-size: 22px; }
-  .quick-btn.pain { border-color: var(--red); }
-  .quick-btn.med { border-color: var(--accent); }
-  .quick-btn.bowel { border-color: var(--green); }
-  .quick-btn.q { border-color: var(--amber); }
-  .quick-btn.care { border-color: var(--purple); }
-  .quick-btn.note { border-color: var(--pink); }
+  .quick-btn iconify-icon { flex-shrink: 0; color: var(--text); }
+  .quick-btn.pain { border-color: var(--red); } .quick-btn.pain iconify-icon { color: var(--red); }
+  .quick-btn.med { border-color: var(--accent); } .quick-btn.med iconify-icon { color: var(--accent); }
+  .quick-btn.bowel { border-color: var(--green); } .quick-btn.bowel iconify-icon { color: var(--green); }
+  .quick-btn.q { border-color: var(--amber); } .quick-btn.q iconify-icon { color: var(--amber); }
+  .quick-btn.care { border-color: var(--purple); } .quick-btn.care iconify-icon { color: var(--purple); }
+  .quick-btn.note { border-color: var(--pink); } .quick-btn.note iconify-icon { color: var(--pink); }
   .section-title { color: var(--text-dim); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; }
   .timeline { display: flex; flex-direction: column; gap: 10px; }
   .entry { background: var(--bg-elevated); border-radius: 12px; padding: 12px 14px; border-left: 3px solid var(--border); }
@@ -113,12 +114,12 @@
 
 <main>
   <div class="quick-actions">
-    <button class="quick-btn pain" onclick="openModal('pain')"><span class="icon">🩺</span><span>Pain Level</span></button>
-    <button class="quick-btn med" onclick="openModal('medication')"><span class="icon">💊</span><span>Medication</span></button>
-    <button class="quick-btn bowel" onclick="openModal('bowel')"><span class="icon">🌿</span><span>Bowel Activity</span></button>
-    <button class="quick-btn q" onclick="openModal('question')"><span class="icon">❓</span><span>Question</span></button>
-    <button class="quick-btn care" onclick="openModal('care')"><span class="icon">👩‍⚕️</span><span>Care Note</span></button>
-    <button class="quick-btn note" onclick="openModal('note')"><span class="icon">📝</span><span>Quick Note</span></button>
+    <button class="quick-btn pain" onclick="openModal('pain')"><iconify-icon icon="solar:heart-pulse-bold-duotone" width="28"></iconify-icon><span>Pain Level</span></button>
+    <button class="quick-btn med" onclick="openModal('medication')"><iconify-icon icon="solar:pills-3-bold-duotone" width="28"></iconify-icon><span>Medication</span></button>
+    <button class="quick-btn bowel" onclick="openModal('bowel')"><iconify-icon icon="solar:leaf-bold-duotone" width="28"></iconify-icon><span>Bowel Activity</span></button>
+    <button class="quick-btn q" onclick="openModal('question')"><iconify-icon icon="solar:question-circle-bold-duotone" width="28"></iconify-icon><span>Question</span></button>
+    <button class="quick-btn care" onclick="openModal('care')"><iconify-icon icon="solar:stethoscope-bold-duotone" width="28"></iconify-icon><span>Care Note</span></button>
+    <button class="quick-btn note" onclick="openModal('note')"><iconify-icon icon="solar:notes-bold-duotone" width="28"></iconify-icon><span>Quick Note</span></button>
   </div>
 
   <div class="section-title">Timeline</div>
